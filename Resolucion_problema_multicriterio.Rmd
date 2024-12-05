@@ -1,39 +1,62 @@
+---
+title: "Resolucion_problema_multicriterio"
+author: "Matteo"
+date: "2024-12-05"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
 source("TDecisionCodigo/teoriadecision_funciones_multicriterio.R")
 source("TDecisionCodigo/teoriadecision_funciones_multicriterio_diagram.R")
 source("TDecisionCodigo/teoriadecision_funciones_multicriterio_utiles.R")
+```
 
-## Datos del Problema
+# Datos del Problema
   
-#   | **Proveedor** | **Costo (€ por tonelada)** | **Confiabilidad (% pedidos puntuales)**  | **Tiempo de entrega (días)**  | **Impacto ambiental (kg CO₂/ton)**   |
-#   |---------------|----------------------------|------------------------------------------|--------------------------------|-------------------------------------|
-#   | **A**         | 850                        | 95                                       | 7                              | 180                                 |
-#   | **B**         | 820                        | 92                                       | 10                             | 200                                 |
-#   | **C**         | 880                        | 98                                       | 5                              | 160                                 |
-#   | **D**         | 900                        | 90                                       | 8                              | 150                                 |
-  
+| **Proveedor** | **Costo (€ por tonelada)** | **Confiabilidad (% pedidos puntuales)** | **Tiempo de entrega (días)** | **Impacto ambiental (kg CO₂/ton)** |
+|---------------|----------------------------|------------------------------------------|--------------------------------|-------------------------------------|
+| **A**         | 850                        | 95                                       | 7                              | 180                                 |
+| **B**         | 820                        | 92                                       | 10                             | 200                                 |
+| **C**         | 880                        | 98                                       | 5                              | 160                                 |
+| **D**         | 900                        | 90                                       | 8                              | 150                                 |
 
-#Fuentes de Datos
-#1. Procurement Resource: Detalles sobre los costos y la sostenibilidad ambiental (https://www.procurementresource.com/)
-#2. MEPS International: Precios actualizados del acero en Italia (https://mepsinternational.com/)
-#3. European Steel Review: Análisis logístico y datos del sector (https://mepsinternational.com/)
 
-tab<-multicriterio.crea.matrizdecision(c(850,0.95,7,180,820,0.92,10,200,880,0.98,5,160,900,0.9,8,150),
-                                       4,4,c("A","B","C","D"),c("Costo","Affidabilità","Tempi di consegna","Impatto ambientale"))
+Fuentes de Datos
+* Procurement Resource: Detalles sobre los costos y la sostenibilidad ambiental (https://www.procurementresource.com/)
+* MEPS International: Precios actualizados del acero en Italia (https://mepsinternational.com/)
+* European Steel Review: Análisis logístico y datos del sector (https://mepsinternational.com/)
+
+```{r}
+tab<-multicriterio.crea.matrizdecision(c(850,0.95,7,180,820,0.92,10,200,880,0.98,5,160,900,0.9,8,150),4,4,c("A","B","C","D"),c("Costo","Affidabilità","Tempi di consegna","Impatto ambientale"))
 tab
+```
 
-#El costo es un criterio de minimizar--> lo transformo para hacerlo un criterio
-#de maximizar
+El costo es un criterio de minimizar.Entonces lo transformo para hacerlo un criterio
+de maximizar
+
+```{r}
 tab[,1]<-1/tab[,1]
 tab
 
 tab2<-multicriterio.homogeneizacion.nadir(tab)
 tab2
-#-----Metodo AHP-----
+```
 
-#comparaciones:
-#* Costo<-2 por Affidabilità; Costo<-3 por Tempi di consegna; Costo<-4 por Impatto Ambientale
-#* Affidabilità<-1.5 por Tempi di consegna; Affidabilità<- 2 por Impatto Ambientale
-#* Tempi di consegna<- 4/3 por Impatto Ambientale
+
+# Metodo AHP
+
+Comparaciones:
+* Costo<-2 por Affidabilità; Costo<-3 por Tempi di consegna; Costo<-4 por Impatto Ambientale
+* Affidabilità<-1.5 por Tempi di consegna; Affidabilità<- 2 por Impatto Ambientale
+* Tempi di consegna<- 4/3 por Impatto Ambientale
+
+```{r}
 install.packages("devtools")
 devtools::install_github("calote/ahp", build_vignettes = TRUE)
 tab3<-multicriterio.crea.matrizvaloraciones_mej(c(2,3,4,1.5,2,4/3),4,c("C1","C2","C3","C4"))
@@ -72,23 +95,26 @@ pesos_glob<-multicriterio.metodoAHP.pesosglobales_entabla(aut$valoraciones.ahp,
                                                            aut4$valoraciones.ahp))
 pesos_glob
 
-#El metodo AHP nos sugiere el provedoor B, porquè tiene el mayor peso global
+```
+
+El metodo AHP nos sugiere el provedoor B, porquè tiene el mayor peso global
 
 
-#----Metodo ELECTRE----
+# Metodo ELECTRE 
 
-#Como pesos utilizo los siguientes:
-#* Costo<- 0.4
-#* Affidabilita<- 0.3
-#* Tempo di consegna<- 0.2
-#* Impatto Ambientale<- 0.1
+Como pesos utilizo los siguientes:
+* Costo<- 0.4
+* Affidabilita<- 0.3
+* Tempo di consegna<- 0.2
+* Impatto Ambientale<- 0.1
 
-#Como d_i tomo:
-#* Costo<- 30
-#* Affidabilità<- 0.03
-#* Tempi di consega<- 2
-#* Impatto AMbientale<- 15
+Como d_i tomo:
+* Costo<- 30
+* Affidabilità<- 0.03
+* Tempi di consega<- 2
+* Impatto AMbientale<- 15
 
+```{r}
 install.packages("qgraph")
 library(qgraph)
 pesos<-c(0.4,0.3,0.2,0.1)
@@ -104,11 +130,14 @@ alpha<-0.55
 el3<-multicriterio.metodoELECTRE_I(tab,pesos,alpha,no_se_compensan,que.alternativas = c(2,3))
 el3
 
-#El metodo Electre no nos da un provedoor mejor, pero al menos elimina dos alternativas (A y D)
-#Tambien en este caso tenemos B como alternativa valida (asì como C claramente)
+```
 
-#----Metodo Promethee-----
+El metodo Electre no nos da un provedoor mejor, pero al menos elimina dos alternativas (A y D)
+Tambien en este caso tenemos B como alternativa valida (asì como C claramente)
 
+# Metodo Promethee
+
+```{r}
 pesos<-c(0.4,0.3,0.2,0.1)
 tab_pref<-matrix(c(5,0.001,0.002,0,
                    5,0.02,0.05,0,
@@ -119,7 +148,9 @@ library(qgraph)
 qgraph::qgraph(promethee_1$tablarelacionsupera)
 
 multicriterio.metodo.promethee_ii(tab,pesos,tab_pref)
+```
 
-#Ambos metodos Promethee (I y II) nos sugieren que el provedoor mejor es el B
-#En conclusion, se puede decir que el provedoor B es lo que elegimos,
-#porquè resulta el mejor en todos los metodos multicriterios utilizados
+
+Ambos metodos Promethee (I y II) nos sugieren que el provedoor mejor es el B
+En conclusion, se puede decir que el provedoor B es lo que elegimos,
+porquè resulta el mejor en todos los metodos multicriterios utilizados
