@@ -4,19 +4,18 @@ source("TDecisionCodigo/teoriadecision_funciones_multicriterio_utiles.R")
 
 ## Datos del Problema
   
-  # | **Fornitore** | **Costo (€ per tonnellata)** | **Affidabilità (% ordini puntuali)** | **Tempi di consegna (giorni)** | **Impatto ambientale (kg CO₂/ton)** |
-  # |---------------|-----------------------------|--------------------------------------|--------------------------------|-------------------------------------|
-  # | **A**         | 850                         | 95%                                  | 7                              | 180                                 |
-  # | **B**         | 820                         | 92%                                  | 10                             | 200                                 |
-  # | **C**         | 880                         | 98%                                  | 5                              | 160                                 |
-  # | **D**         | 900                         | 90%                                  | 8                              | 150                                 |
+#   | **Proveedor** | **Costo (€ por tonelada)** | **Confiabilidad (% pedidos puntuales)**  | **Tiempo de entrega (días)**  | **Impacto ambiental (kg CO₂/ton)**   |
+#   |---------------|----------------------------|------------------------------------------|--------------------------------|-------------------------------------|
+#   | **A**         | 850                        | 95                                       | 7                              | 180                                 |
+#   | **B**         | 820                        | 92                                       | 10                             | 200                                 |
+#   | **C**         | 880                        | 98                                       | 5                              | 160                                 |
+#   | **D**         | 900                        | 90                                       | 8                              | 150                                 |
   
 
-## Fonti dei Dati
-  
-#1. Procurement Resource: Dettagli sui costi e sostenibilità ambientale (https://www.procurementresource.com/)
-#2. MEPS International: Prezzi aggiornati dell'acciaio in Italia (https://mepsinternational.com/)
-#3. European Steel Review: Analisi logistiche e dati di settore (https://mepsinternational.com/)
+#Fuentes de Datos
+#1. Procurement Resource: Detalles sobre los costos y la sostenibilidad ambiental (https://www.procurementresource.com/)
+#2. MEPS International: Precios actualizados del acero en Italia (https://mepsinternational.com/)
+#3. European Steel Review: Análisis logístico y datos del sector (https://mepsinternational.com/)
 
 tab<-multicriterio.crea.matrizdecision(c(850,0.95,7,180,820,0.92,10,200,880,0.98,5,160,900,0.9,8,150),
                                        4,4,c("A","B","C","D"),c("Costo","Affidabilità","Tempi di consegna","Impatto ambientale"))
@@ -78,16 +77,22 @@ pesos_glob
 #----Metodo ELECTRE----
 
 #Como pesos utilizo los siguientes:
-#* Costo<-0.4
-#* Affidabilita<-0.3
-#* Tempo di consegna<-0.2
-#* Impatto Ambientale<-0.1
+#* Costo<- 0.4
+#* Affidabilita<- 0.3
+#* Tempo di consegna<- 0.2
+#* Impatto Ambientale<- 0.1
+
+#Como d_i tomo:
+#* Costo<- 30
+#* Affidabilità<- 0.03
+#* Tempi di consega<- 2
+#* Impatto AMbientale<- 15
 
 install.packages("qgraph")
 library(qgraph)
 pesos<-c(0.4,0.3,0.2,0.1)
 alpha<-0.7
-no_se_compensan<-c(0.0001,0.03,2,15)
+no_se_compensan<-c(1/30,0.03,2,15)
 el1<-multicriterio.metodoELECTRE_I(tab,pesos,alpha,no_se_compensan)
 el1
 el<-func_ELECTRE_Completo(el1)
